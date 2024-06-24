@@ -2,23 +2,25 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
 const sgMail = require('@sendgrid/mail');
-const cors = require('cors')
+const cors = require('cors');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Twilio configuration
-const accountSid = 'ACec5aff5c91360e3be823f08bf8f19b8f';
-const authToken = '73fc1f9ac062ffc225625da38a3b4d59';
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
 
 // SendGrid configuration
-sgMail.setApiKey('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');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-app.use(cors())
-
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
-
 app.use(bodyParser.json());
 
 // Route for sending WhatsApp messages
@@ -34,12 +36,12 @@ app.post('/send-message', (req, res) => {
     
     Freundliche Grüße,
     Ihr SchadenNetzwerk`;
-    
+
     const message = messageTemplate.replace('{{1}}', salutation).replace('{{2}}', lName);
 
     client.messages
         .create({
-            messagingServiceSid: 'MG86b01e2ca8d60bc028e397b73bbeee26', 
+            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
             body: message,
             to: `whatsapp:${to}`
         })
@@ -59,7 +61,7 @@ app.post('/send-email', (req, res) => {
     const subject = "Good Morning";
     const salutation = req.body.salutation;
     const lName = req.body.lastName;
-    const templateId = 'd-1ea4e27b28084725a86f014c1df8e3a8'; // Replace with your SendGrid template ID
+    const templateId = process.env.SENDGRID_TEMPLATE_ID;
     const dynamicData = {
         salutation: salutation,
         lName: lName,
@@ -68,10 +70,10 @@ app.post('/send-email', (req, res) => {
 
     const msg = {
         to: to,
-        from: 'schadennetzwerk@gmail.com', // Replace with your verified sender email
+        from: process.env.SENDGRID_FROM_EMAIL, // Replace with your verified sender email
         subject: subject,
         templateId: templateId,
-        // dynamic_template_data: dynamicData,
+        dynamic_template_data: dynamicData, // Ensure this is uncommented
     };
 
     sgMail.send(msg)
