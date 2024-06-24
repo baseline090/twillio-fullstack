@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { BASE_URL, NEW_URL } from "../utils/url";
-import sgMail from "@sendgrid/mail";
 import Spinner from "../components/Spinner";
 
 sgMail.setApiKey("YOUR_SENDGRID_API_KEY"); // Replace with your actual SendGrid API key
