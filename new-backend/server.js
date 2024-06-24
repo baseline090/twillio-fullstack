@@ -19,7 +19,7 @@ const client = twilio(accountSid, authToken);
 // SendGrid configuration
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-app.use(cors());
+app.use(cors()); 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
