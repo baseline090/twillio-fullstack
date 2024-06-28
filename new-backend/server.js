@@ -2,11 +2,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const twilio = require('twilio');
 const sgMail = require('@sendgrid/mail');
+const connectDB = require('./config/db');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const countRoutes = require('./routes/countRoutes'); // Import the count routes
+const getCount = require('./routes/count'); // Import the count routes
 
 // Load environment variables from .env file
 dotenv.config();
+connectDB();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,11 +27,18 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Route for sending WhatsApp messages
+// Use count routes
+app.use('/increment', countRoutes); // Use the count routes for incrementing counts
+
+app.use('/api', getCount);
+console.log(getCount)
+
+// Route for sending messages
 app.post('/send-message', (req, res) => {
     const to = req.body.phoneNumber;
     const salutation = req.body.salutation;
     const lName = req.body.lastName;
+    const messageType = req.body.type;
     const messageTemplate = `Guten Tag {{1}} {{2}},
 
     im Anhang finden Sie den Link zur Präsentation über die Kooperation mit dem SchadenNetzwerk von Justizcar:
@@ -39,12 +50,22 @@ app.post('/send-message', (req, res) => {
 
     const message = messageTemplate.replace('{{1}}', salutation).replace('{{2}}', lName);
 
+    const messageOptions = {
+        body: message,
+        to: to,
+    };
+
+    if (messageType === 'whatsapp') {
+        messageOptions.to = `whatsapp:${to}`;
+        messageOptions.messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+    } else if (messageType === 'sms') {
+        messageOptions.from = process.env.TWILIO_PHONE_NUMBER;
+    } else {
+        return res.status(400).send('Invalid message type');
+    }
+
     client.messages
-        .create({
-            messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
-            body: message,
-            to: `whatsapp:${to}`
-        })
+        .create(messageOptions)
         .then(message => {
             console.log(message.sid);
             res.status(200).send('Message sent!');
