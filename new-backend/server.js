@@ -41,12 +41,20 @@ app.post('/send-message', (req, res) => {
     const messageType = req.body.type;
     const messageTemplate = `Guten Tag {{1}} {{2}},
 
-    im Anhang finden Sie den Link zur Präsentation über die Kooperation mit dem SchadenNetzwerk von Justizcar:
-    
-    External Link
-    
-    Freundliche Grüße,
-    Ihr SchadenNetzwerk`;
+hier der Link zur Präsentation für eine gemeinsame und erfolgreiche Kooperation mit uns, dem
+SchadenNetzwerk von Justizcar GmbH!
+
+https://youtu.be/5ELSARcct_k
+
+www.Justizcar.de
+
+www.SchadenNetzwerk.com
+
+Wir freuen uns auf Sie!
+
+Alles Gute
+
+Ihr Frank Roll MSc,MBA`;
 
     const message = messageTemplate.replace('{{1}}', salutation).replace('{{2}}', lName);
 
