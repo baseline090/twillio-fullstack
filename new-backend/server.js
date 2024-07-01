@@ -30,6 +30,9 @@ app.use(bodyParser.json());
 // Use count routes
 app.use('/increment', countRoutes); // Use the count routes for incrementing counts
 
+app.use('/api/v1', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+
 app.use('/api', getCount);
 console.log(getCount)
 
