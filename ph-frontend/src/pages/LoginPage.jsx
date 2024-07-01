@@ -118,7 +118,8 @@ const LoginPage = () => {
         }),
       });
       const result = await response.json();
-      console.log("siiii", result);
+      console.log(result, "result")
+      // console.log("siiii", result);
       if (result.success) {
         toast.success("Signup Successful");
         const expiry = Date.now() + 28 * 24 * 60 * 60 * 1000; // 24 hours expiry
