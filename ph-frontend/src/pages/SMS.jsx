@@ -6,7 +6,7 @@ import Spinner from "../components/Spinner";
 
 const SMSForm = () => {
   const [formData, setFormData] = useState({
-    salutation: "",
+    salutation: "Herr",
     firstName: "",
     lastName: "",
     email: "",
@@ -56,13 +56,13 @@ const SMSForm = () => {
     const { salutation, firstName, lastName, email, phoneNumber, message } =
       formData;
     if (!salutation) return "Please select a salutation.";
-    if (!firstName) return "Please enter a first name.";
+    // if (!firstName) return "Please enter a first name.";
     if (!lastName) return "Please enter a last name.";
     if (!email) return "Please enter an email address.";
     if (!/^\S+@\S+\.\S+$/.test(email))
       return "Please enter a valid email address.";
     if (!phoneNumber) return "Please enter a phone number.";
-    if (!message) return "Please enter a message.";
+    // if (!message) return "Please enter a message.";
     return null;
   };
 
@@ -104,7 +104,7 @@ const SMSForm = () => {
       return;
     }
 
-    let { phoneNumber, salutation, lastName, message, email } = formData;
+    let { phoneNumber, salutation="Herr", lastName, message, email } = formData;
     let modifiedMessage;
     let url;
     let data;
@@ -167,12 +167,12 @@ Ihr SchadenNetzwerk
                 onChange={handleChange}
                 className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
               >
-                <option value="">Select</option>
+                {/* <option value="">Select</option> */}
                 <option value="Herr">Herr</option>
                 <option value="Frau">Frau</option>
               </select>
             </div>
-            <div className="mb-4 w-[80%]">
+            {/* <div className="mb-4 w-[80%]">
               <label
                 htmlFor="firstName"
                 className="block text-sm font-medium text-gray-700 mb-1"
@@ -187,9 +187,8 @@ Ihr SchadenNetzwerk
                 onChange={handleChange}
                 className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
               />
-            </div>
-          </div>
-          <div className="mb-4">
+            </div> */}
+            <div className="mb-4 w-[80%]">
             <label
               htmlFor="lastName"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -205,6 +204,23 @@ Ihr SchadenNetzwerk
               className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
             />
           </div>
+          </div>
+          {/* <div className="mb-4">
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Last Name
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
+            />
+          </div> */}
           <div className="mb-4">
             <label
               htmlFor="email"
