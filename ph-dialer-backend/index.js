@@ -4,6 +4,8 @@ const twilio = require("twilio");
 require("dotenv").config();
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 const WebSocket = require("ws");
+const sgMail = require('@sendgrid/mail');
+const getCount = require('./routes/count')
 
 let wsClient;
 
@@ -12,8 +14,8 @@ const errHandler = require("./middleware/error");
 const AccessToken = require("twilio").jwt.AccessToken;
 const VoiceGrant = AccessToken.VoiceGrant;
 
-const accountSid = "AC5cfecd44569b0a29427b02943034086c";
-const authToken = "71f60bc7cd3576712034a39c066bd2b4";
+const accountSid = process.env.TWILIO_LIVE_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 // const accountSid = "AC5cfecd44569b0a29427b02943034086c";
 // const authToken = "71f60bc7cd3576712034a39c066bd2b4";
 const client = new twilio(accountSid, authToken);
@@ -24,7 +26,9 @@ const connectDB = require("./database");
 const msgModel = require("./models/SMSmodel");
 const replyModel = require("./models/replyModel");
 const callModel = require("./models/callModel");
+const countRoutes = require('./routes/countRoutes')
 // const whatsappreplyModel = require("./models/whatsappreplymodel");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const app = express();
 const server = require("http").createServer(app);
@@ -35,11 +39,104 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.use("/api/v1", userRoutes);
+
+// count routes
+app.use('/api', getCount);
+app.use('/increment', countRoutes); 
+
 // app.use("/api/v1", templateRoutes);
 connectDB();
 
 app.get("/", async (req, res) => {
   res.status(200).send("deployed successfully dialer!");
+});
+
+app.post('/send-message', (req, res) => {
+  const { phoneNumber, salutation, lastName, type } = req.body;
+
+  if (!phoneNumber || !salutation || !lastName || !type) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const messageTemplate = `Guten Tag {{1}} {{2}},
+
+hier der Link zur Präsentation für eine gemeinsame und erfolgreiche Kooperation mit uns, dem
+SchadenNetzwerk von Justizcar GmbH!
+
+https://youtu.be/5ELSARcct_k
+
+www.Justizcar.de
+
+www.SchadenNetzwerk.com
+
+Wir freuen uns auf Sie!
+
+Alles Gute
+
+Ihr Frank Roll MSc,MBA`;
+
+  const message = messageTemplate.replace('{{1}}', salutation).replace('{{2}}', lastName);
+
+  const messageOptions = {
+    body: message,
+    to: phoneNumber,
+  };
+
+  if (type === 'whatsapp') {
+    messageOptions.to = `whatsapp:${phoneNumber}`;
+    messageOptions.messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+  } else if (type === 'sms') {
+    messageOptions.from = process.env.TWILIO_PHONE_NUMBER;
+  } else {
+    return res.status(400).json({ error: 'Invalid message type' });
+  }
+
+  client.messages
+    .create(messageOptions)
+    .then(message => {
+      console.log(message.sid);
+      res.status(200).json({ message: 'Message sent!' });
+    })
+    .catch(error => {
+      console.error('Failed to send message:', error);
+      res.status(500).json({ error: 'Failed to send message', details: error.message });
+    });
+});
+
+app.post('/send-email', (req, res) => {
+  const { email, salutation, lastName } = req.body;
+
+  if (!email || !salutation || !lastName) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const templateId = process.env.SENDGRID_TEMPLATE_ID;
+
+  const dynamicData = {
+    salutation: salutation,
+    lName: lastName,
+  };
+
+  const msg = {
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL,
+    templateId: templateId,
+    dynamic_template_data: dynamicData,
+  };
+
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent');
+      res.status(200).json({ message: 'Email sent!' });
+    })
+    .catch(error => {
+      console.error('Failed to send email:', error);
+      if (error.response) {
+        console.error('Error details:', error.response.body);
+      }
+      res.status(500).json({ error: 'Failed to send email', details: error.message });
+    });
 });
 
 app.post("/webhookforcall", async (req, res) => {

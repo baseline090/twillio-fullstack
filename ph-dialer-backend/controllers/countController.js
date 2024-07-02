@@ -6,13 +6,11 @@ const incrementCount = async (req, res, type) => {
   console.log(req.body)
   try {
     let user = await Count.findOne({ id });
-    console.log('user: ', user);
     if (!user) {
       user = new Count({ id, email: req.body.userEmail });
     }
-    
+
     if (type === 'email') {
-      console.log('incrementCount: ');
       user.emailCount += 1;
     } else if (type === 'sms') {
       user.smsCount += 1;

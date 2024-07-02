@@ -22,6 +22,7 @@ const App = () => {
         setisLoggedIn(false);
         return;
       }
+      console.log(userDetails.token, "userDetails.token")
       try {
         const response = await axios.get(`${BASE_URL}/api/v1/user/me`, {
           headers: {

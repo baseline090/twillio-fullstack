@@ -120,15 +120,15 @@ External Link
 Freundliche Grüße,
 Ihr SchadenNetzwerk
 `;
-      if (!phoneNumber.startsWith("+49")) {
-        phoneNumber = `+49${phoneNumber}`;
+      if (!phoneNumber.startsWith("+91")) {
+        phoneNumber = `+91${phoneNumber}`;
       }
 
       url = `${NEW_URL}/send-message`;
       data = { phoneNumber, salutation, lastName, type };
     } else if (type === "whatsapp") {
-      if (!phoneNumber.startsWith("+49")) {
-        phoneNumber = `+49${phoneNumber}`;
+      if (!phoneNumber.startsWith("+91")) {
+        phoneNumber = `+91${phoneNumber}`;
       }
       url = `${NEW_URL}/send-message`;
       data = { phoneNumber, salutation, lastName, type };
