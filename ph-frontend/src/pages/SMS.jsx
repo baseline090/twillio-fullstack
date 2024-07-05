@@ -23,6 +23,7 @@ const SMSForm = () => {
     smsCount: 0,
     whatsappCount: 0,
   });
+  const [excelData, setExcelData] = useState();
 
   const userDetails = JSON.parse(localStorage.getItem("userDetails"));
   const { _id: userId, email: userEmail } = userDetails.user;
@@ -84,6 +85,7 @@ const SMSForm = () => {
         userEmail,
       });
       console.log(res);
+      saveFormData();
       // Update the counts
       setCounts((prevCounts) => ({
         ...prevCounts,
@@ -104,7 +106,13 @@ const SMSForm = () => {
       return;
     }
 
-    let { phoneNumber, salutation="Herr", lastName, message, email } = formData;
+    let {
+      phoneNumber,
+      salutation = "Herr",
+      lastName,
+      message,
+      email,
+    } = formData;
     let modifiedMessage;
     let url;
     let data;
@@ -140,14 +148,103 @@ Ihr SchadenNetzwerk
     await sendRequest(url, data, type);
   };
 
+  // ----------Users details Excelfile---------------
+  // const handleSendDetails = async () => {
+  //   setExcelData(true);
+  //   try {
+  //     const response = await axios.get(`${NEW_URL}/increment/download-excel`, {
+  //       responseType: "blob",
+  //     });
+
+  //     // Create a excelData from the response data
+  //     const excelData = new Blob([response.data], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+
+  //     // Create a URL for the Blob
+  //     const url = window.URL.createObjectURL(excelData);
+
+  //     // Create an anchor element and trigger the download
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = "user_details.xlsx";
+  //     document.body.appendChild(a);
+  //     a.click();
+
+  //     // Clean up
+  //     setExcelData(false);
+  //   } catch (error) {
+  //     console.error("Error downloading Excel file:", error);
+  //     setExcelData(false);
+  //   }
+  // };
+
+
+    // ----------FormField details Excelfile---------------
+  const handleSendDetails = async () => {
+    setExcelData(true);
+    try {
+      const response = await axios.get(`${NEW_URL}/increment/downloadsave-formdata-excel`, {
+        responseType: "blob",
+      });
+
+      // Create a excelData from the response data
+      const excelData = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Create a URL for the Blob
+      const url = window.URL.createObjectURL(excelData);
+
+      // Create an anchor element and trigger the download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "user_details.xlsx";
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      setExcelData(false);
+    } catch (error) {
+      console.error("Error downloading Excel file:", error);
+      setExcelData(false);
+    }
+  };
+  
+
+  const saveFormData = async () => {
+    try {
+      const response = await axios.post(`${NEW_URL}/increment/save-form-data`, formData, {
+        headers: {
+          Authorization: `Bearer ${userDetails.token}`,
+        },
+      });
+      console.log("Form data saved:", response.data);
+    } catch (error) {
+      console.error("Error saving form data:", error);
+    }
+  };
+
   return (
     <>
       <div className="max-w-lg mx-auto p-4 mt-32 bg-white shadow-md rounded-lg">
-        <div className="mb-10">
-          <h2 className="text-xl font-bold">Counts:</h2>
-          <p>Total Email Sent: {counts.emailCount}</p>
-          <p>Total SMS Sent: {counts.smsCount}</p>
-          <p>Total WhatsApp message sent: {counts.whatsappCount}</p>
+        <div className="flex justify-between ">
+          <div className="mb-10">
+            <h2 className="text-xl font-bold">Counts:</h2>
+            <p>Total Email Sent: {counts.emailCount}</p>
+            <p>Total SMS Sent: {counts.smsCount}</p>
+            <p>Total WhatsApp message sent: {counts.whatsappCount}</p>
+          </div>
+          <div className=" mr-2 mt-3">
+            <button
+              type="button"
+              onClick={() => handleSendDetails("email")}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              disabled={loading.email}
+            >
+              {loading.email ? <Spinner /> : "Export"}
+            </button>
+          </div>
         </div>
         <Toaster />
         <h1 className="text-2xl font-bold mb-4">Send Message</h1>
@@ -189,21 +286,21 @@ Ihr SchadenNetzwerk
               />
             </div> */}
             <div className="mb-4 w-[80%]">
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Last Name
-            </label>
-            <input
-              id="lastName"
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
-            />
-          </div>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none p-2"
+              />
+            </div>
           </div>
           {/* <div className="mb-4">
             <label
@@ -246,7 +343,7 @@ Ihr SchadenNetzwerk
             </label>
             <div className="flex items-center border bg-gray-50 border-gray-300 rounded-md p-2">
               <span className="text-gray-500 mr-2">
-                <span className="text-[18px] font-semibold">&#43;</span>49
+                <span className="text-[18px] font-semibold">&#43;</span>91
               </span>
               <input
                 id="phoneNumber"
