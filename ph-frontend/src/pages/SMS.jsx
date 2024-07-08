@@ -343,7 +343,7 @@ Ihr SchadenNetzwerk
             </label>
             <div className="flex items-center border bg-gray-50 border-gray-300 rounded-md p-2">
               <span className="text-gray-500 mr-2">
-                <span className="text-[18px] font-semibold">&#43;</span>91
+                <span className="text-[18px] font-semibold">&#43;</span>49
               </span>
               <input
                 id="phoneNumber"
