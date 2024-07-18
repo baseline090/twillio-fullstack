@@ -8,7 +8,7 @@ import SMS from "../pages/SMS";
 import History from "../pages/History";
 import AdminPage from "../pages/AdminPage";
 import UserDetailsPage from "../pages/UserDetails";
-
+import UploadForm from '../pages/UploadForm';
 const AuthenticatedLayout = () => {
   return (
     <div>
@@ -22,6 +22,7 @@ const AuthenticatedLayout = () => {
             <Route path="/" element={<SMS />} />
             <Route path="/history" element={<History />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/upload" element={<UploadForm />} />
             <Route path="/admin/user/:id" element={<UserDetailsPage />} />
             {/* Add other authenticated routes here */}
           </Routes>

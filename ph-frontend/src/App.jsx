@@ -7,6 +7,7 @@ import UnauthenticatedLayout from "./components/UnauthenticatedLayout";
 import { BASE_URL } from "./utils/url";
 import axios from "axios";
 
+
 const App = () => {
   const { isLoggedIn, setisLoggedIn } = useAppContext();
   const userDetails = JSON.parse(localStorage.getItem("userDetails"));
