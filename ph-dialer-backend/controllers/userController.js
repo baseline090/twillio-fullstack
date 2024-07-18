@@ -314,12 +314,8 @@ const getUserCallsByAdmin = async (req, res) => {
 };
 
 const createBulkSendEmail = asyncHandler(async (req, res, next) => {
-
   const file = req.file;
   if (!file) return res.status(400).send('No file uploaded.');
-
-
-
   try {
     const workbook = xlsx.readFile(file.path);
     const sheetName = workbook.SheetNames[0];
@@ -331,22 +327,53 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
       return res.status(400).send('Row count exceeds 3000.');
     }
 
-    const emails = data.map(row => row.email);
-    const bulkEmailModels = data.map(row => ({
-      name: row.name,
-      email: row.email,
-      address: row.name,
-      zipcode: row.email,
-      city: row.name,
-      phone: row.email,
-      reference: row.email,
-      createdAt: moment().toDate(),
-      updatedAt: moment().toDate(),
-    }));
-    await bulkEmailModel.insertMany(bulkEmailModels);
+    // const emails = data.map(row => row.email);
+    // const bulkEmailModels = data.map(row => ({
+    //   name: row.name,
+    //   email: row.email,
+    //   address: row.name,
+    //   zipcode: row.email,
+    //   city: row.name,
+    //   phone: row.email,
+    //   reference: row.email,
+    //   createdAt: moment().toDate(),
+    //   updatedAt: moment().toDate(),
+    // }));
+
+    ///New Way start
+    const validData = [];
+    const emails = [];
+    const invalidRows = [];
+
+    data.forEach((row, index) => {
+      if (row.name && row.email) {
+        validData.push({
+          name: row.name,
+          email: row.email,
+          address: row.address,
+          zipcode: row.zipcode,
+          city: row.city,
+          phone: row.phone,
+          reference: row.reference,
+          createdAt: moment().toDate(),
+          updatedAt: moment().toDate(),
+        });
+        emails.push(row.email);
+      } else {
+        invalidRows.push({ rowNumber: index + 1, rowData: row });
+      }
+    });
+    
+
+     // Store valid data in the database
+     await bulkEmailModel.insertMany(validData);
+    ///New Way end
+    // await bulkEmailModel.insertMany(bulkEmailModels);
+
+    // Prepare email messages only for entries with valid emails
     const templateId = process.env.SENDGRID_TEMPLATE_ID;
     const salutation = req.body.salutation;
-    const lName = req.body.lastName;
+    const lName = req.body.name;
     const dynamicData = {
       salutation: salutation,
       lName: lName,
@@ -362,7 +389,16 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
       // html: '<strong>Welcome to our service!</strong>',
     }));
 
+    //Add New start
+   // Send emails
+   try {
     await sgMail.send(messages);
+  } catch (emailError) {
+    console.error('Error sending emails:', emailError);
+    // Continue without stopping the execution if email sending fails
+  }
+    //Add new End
+    // await sgMail.send(messages);
     fs.unlinkSync(file.path); // Clean up the file
 
     res.status(200).send('Emails sent and data stored.');
