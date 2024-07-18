@@ -65,6 +65,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <FaUser className="mr-3" /> Admin
           </Link>
         )}
+
+         {/* <Link
+          to="/contacts"
+          className="flex items-center my-4 px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white"
+        >
+          <FaHistory className="mr-3" /> Contacts
+        </Link> */}
+        {userDetails.user.role == "admin" && (
+          <Link
+            to="/admin/upload"
+            className="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white"
+          >
+            <FaUser className="mr-3" /> Upload
+          </Link>
+        )}
       </nav>
     </div>
   );
