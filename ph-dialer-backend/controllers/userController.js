@@ -9,6 +9,17 @@ const AccessToken = require("twilio").jwt.AccessToken;
 const VoiceGrant = AccessToken.VoiceGrant;
 const Call = require("../models/callModel");
 
+const multer = require('multer');
+const xlsx = require('xlsx');
+const sgMail = require('@sendgrid/mail');
+const moment = require('moment');
+const upload = multer({ dest: 'uploads/' });
+const fs = require('fs');
+
+
+const bulkEmailModel = require("../models/bulkEmailModel");
+
+
 //singup user
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -60,7 +71,7 @@ const getUserDetails = asyncHandler(async (req, res, next) => {
     success: true,
     user,
   });
-});
+}); 
 const getUserDetailsAdmin = asyncHandler(async (req, res, next) => {
   const user = await userModel.findById(req.params.id);
   res.status(200).json({
@@ -301,6 +312,69 @@ const getUserCallsByAdmin = async (req, res) => {
       .json({ success: false, message: "Error fetching calls", error });
   }
 };
+
+const createBulkSendEmail = asyncHandler(async (req, res, next) => {
+
+  const file = req.file;
+  if (!file) return res.status(400).send('No file uploaded.');
+
+
+
+  try {
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+
+    if (data.length > 3000) {
+      fs.unlinkSync(file.path); // Clean up the file
+      return res.status(400).send('Row count exceeds 3000.');
+    }
+
+    const emails = data.map(row => row.email);
+    const bulkEmailModels = data.map(row => ({
+      name: row.name,
+      email: row.email,
+      address: row.name,
+      zipcode: row.email,
+      city: row.name,
+      phone: row.email,
+      reference: row.email,
+      createdAt: moment().toDate(),
+      updatedAt: moment().toDate(),
+    }));
+    await bulkEmailModel.insertMany(bulkEmailModels);
+    const templateId = process.env.SENDGRID_TEMPLATE_ID;
+    const salutation = req.body.salutation;
+    const lName = req.body.lastName;
+    const dynamicData = {
+      salutation: salutation,
+      lName: lName,
+    };
+
+    const messages = emails.map(email => ({
+      to: email,
+      from: process.env.SENDGRID_FROM_EMAIL, // Replace with your verified sender email
+      subject: 'Welcome!',
+      templateId: templateId,
+      dynamic_template_data: dynamicData, // Ensure
+      // text: 'Welcome to our service!',
+      // html: '<strong>Welcome to our service!</strong>',
+    }));
+
+    await sgMail.send(messages);
+    fs.unlinkSync(file.path); // Clean up the file
+
+    res.status(200).send('Emails sent and data stored.');
+  } catch (error) {
+    fs.unlinkSync(file.path); // Clean up the file
+    console.error('Error processing data:', error); // Log the error for debugging
+    res.status(500).send('Error processing data.');
+  }
+
+
+});
+
 const getAllUserCalls = async (req, res) => {
   const userId = req.user.id;
 
@@ -330,4 +404,5 @@ module.exports = {
   deleteUser,
   getUserMessages,
   getUserDetailsAdmin,
+  createBulkSendEmail,
 };
