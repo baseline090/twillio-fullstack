@@ -1,4 +1,18 @@
 const express = require("express");
+
+
+const multer = require('multer');
+const xlsx = require('xlsx');
+const sgMail = require('@sendgrid/mail');
+const moment = require('moment');
+const mongoose = require('mongoose');
+// const User = require('./db');
+
+const app = express();
+const upload = multer({ dest: 'uploads/' });
+
+
+const bulkEmailModel = require("../models/bulkEmailModel");
 const {
   registerUser,
   loginUser,
@@ -15,6 +29,7 @@ const {
   getUserDetailsAdmin,
   getAllUserCalls,
   getUserCallsByAdmin,
+  createBulkSendEmail,
 } = require("../controllers/userController");
 const Call = require("../models/callModel");
 const {
@@ -148,5 +163,54 @@ router.get(
 // router.post("/sendgmessagetogroup", isAuthenticatedUser, sendgroupmsgwhatsapp);
 // router.post("/statuschanged", getMessageStatusUpdate);
 // router.post("/statuschangedWhatsapp", getMessageStatusUpdateWhatsapp);
+
+
+router.post(
+  "/admin/upload",
+  upload.single('file'),
+  // isAuthenticatedUser,
+  // authRoles("admin"),
+  createBulkSendEmail
+);
+
+// router.post('/admin/upload', isAuthenticatedUser,authRoles("admin"),upload.single('file'), async (req, res) => {
+//   const file = req.file;
+//   if (!file) return res.status(400).send('No file uploaded.');
+
+//   const workbook = xlsx.readFile(file.path);
+//   const sheetName = workbook.SheetNames[0];
+//   const sheet = workbook.Sheets[sheetName];
+//   const data = xlsx.utils.sheet_to_json(sheet);
+
+//   if (data.length > 3000) {
+//       return res.status(400).send('Row count exceeds 3000.');
+//   }
+
+//   const emails = data.map(row => row.email);
+//   const bulkEmailModels = data.map(row => ({
+//       name: row.name,
+//       email: row.email,
+//       createdAt: moment().toDate(),
+//       updatedAt: moment().toDate(),
+//   }));
+
+//   try {
+//       await bulkEmailModel.insertMany(bulkEmailModels);
+
+//       const messages = emails.map(email => ({
+//           to: email,
+//           from: 'your-email@example.com',
+//           subject: 'Welcome!',
+//           text: 'Welcome to our service!',
+//           html: '<strong>Welcome to our service!</strong>',
+//       }));
+
+//       await sgMail.send(messages);
+
+//       res.status(200).send('Emails sent and data stored.');
+//   } catch (error) {
+//       res.status(500).send('Error processing data.');
+//   }
+// });
 
 module.exports = router;
