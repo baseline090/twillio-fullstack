@@ -366,7 +366,20 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
     
 
      // Store valid data in the database
-     await bulkEmailModel.insertMany(validData);
+    //  await bulkEmailModel.insertMany(validData);
+
+    ////
+        // Check for existing emails in the database
+        const existingEmails = await bulkEmailModel.find({ email: { $in: emails } }, 'email');
+        const existingEmailSet = new Set(existingEmails.map(doc => doc.email));
+
+        const newValidData = validData.filter(data => !existingEmailSet.has(data.email));
+        const newEmails = emails.filter(email => !existingEmailSet.has(email));
+
+            // Store new valid data in the database
+    if (newValidData.length > 0) {
+      await bulkEmailModel.insertMany(newValidData);
+    }
     ///New Way end
     // await bulkEmailModel.insertMany(bulkEmailModels);
 
@@ -379,7 +392,8 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
       lName: lName,
     };
 
-    const messages = emails.map(email => ({
+    // const messages = emails.map(email => ({
+    const messages = newEmails.map(email => ({
       to: email,
       from: process.env.SENDGRID_FROM_EMAIL, // Replace with your verified sender email
       subject: 'Welcome!',
