@@ -395,7 +395,7 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
     // const messages = emails.map(email => ({
     const messages = newEmails.map(email => ({
       to: email,
-      from: process.env.SENDGRID_FROM_EMAIL, // Replace with your verified sender email
+      from: process.env.SENDGRID_TEMPLATE_ID_Second, // Replace with your verified sender email
       subject: 'Welcome!',
       templateId: templateId,
       dynamic_template_data: dynamicData, // Ensure
