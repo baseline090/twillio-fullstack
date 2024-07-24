@@ -30,6 +30,8 @@ const {
   getAllUserCalls,
   getUserCallsByAdmin,
   createBulkSendEmail,
+  getAllBulkEmails,
+  getDailyBulkEmails,
 } = require("../controllers/userController");
 const Call = require("../models/callModel");
 const {
@@ -173,6 +175,19 @@ router.post(
   createBulkSendEmail
 );
 
+router.get(
+  "/admin/allbulkemail",
+  isAuthenticatedUser,
+  authRoles("admin"),
+  getAllBulkEmails
+);
+
+router.get(
+  "/admin/dailybulkemail",
+  isAuthenticatedUser,
+  authRoles("admin"),
+  getDailyBulkEmails
+);
 // router.post('/admin/upload', isAuthenticatedUser,authRoles("admin"),upload.single('file'), async (req, res) => {
 //   const file = req.file;
 //   if (!file) return res.status(400).send('No file uploaded.');

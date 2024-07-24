@@ -9,6 +9,8 @@ import History from "../pages/History";
 import AdminPage from "../pages/AdminPage";
 import UserDetailsPage from "../pages/UserDetails";
 import UploadForm from '../pages/UploadForm';
+import BulkEmailList from '../pages/BulkEmailList'
+import BulkEmailDailyList from "../pages/BulkEmailDailyList";
 const AuthenticatedLayout = () => {
   return (
     <div>
@@ -22,8 +24,12 @@ const AuthenticatedLayout = () => {
             <Route path="/" element={<SMS />} />
             <Route path="/history" element={<History />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/upload" element={<UploadForm />} />
             <Route path="/admin/user/:id" element={<UserDetailsPage />} />
+            <Route path="/admin/upload" element={<UploadForm />} />
+            <Route path="/admin/BulkEmail/List" element={<BulkEmailList />} />
+            <Route path="/admin/BulkEmailDaily/List" element={<BulkEmailDailyList />} />
+
+
             {/* Add other authenticated routes here */}
           </Routes>
         </div>

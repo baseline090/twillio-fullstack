@@ -80,6 +80,24 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <FaUser className="mr-3" /> Upload
           </Link>
         )}
+
+{userDetails.user.role == "admin" && (
+          <Link
+            to="/admin/BulkEmail/List"
+            className="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white"
+          >
+            <FaUser className="mr-3" /> BulkEmail List
+          </Link>
+        )}
+
+{userDetails.user.role == "admin" && (
+          <Link
+            to="/admin/BulkEmailDaily/List"
+            className="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white"
+          >
+            <FaUser className="mr-3" /> BulkEmail Daily List
+          </Link>
+        )}
       </nav>
     </div>
   );

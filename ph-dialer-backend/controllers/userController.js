@@ -162,6 +162,39 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
     return next(new ErrorHandler("Error fetching users", 500));
   }
 });
+
+const getAllBulkEmails = asyncHandler(async (req, res, next) => {
+  try {
+    const users = await bulkEmailModel.find();
+    console.log(users,"aaaaaaaaaaaaaaaaaaa")
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    return next(new ErrorHandler("Error fetching users", 500));
+  }
+});
+
+
+const getDailyBulkEmails = asyncHandler(async (req, res, next) => {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    // Query the database for users created in the last 24 hours
+    const users = await bulkEmailModel.find({
+      createdAt: { $gte: twentyFourHoursAgo }
+    });
+
+    console.log(users, "aaaaaaaaaaaaaaaaaaa");
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    return next(new ErrorHandler("Error fetching users", 500));
+  }
+});
 const grantAccess = asyncHandler(async (req, res, next) => {
   const { userId } = req.params;
 
@@ -384,7 +417,7 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
     // await bulkEmailModel.insertMany(bulkEmailModels);
 
     // Prepare email messages only for entries with valid emails
-    const templateId = process.env.SENDGRID_TEMPLATE_ID;
+    const templateId = process.env.SENDGRID_TEMPLATE_ID_Second;
     const salutation = req.body.salutation;
     const lName = req.body.name;
     const dynamicData = {
@@ -395,7 +428,7 @@ const createBulkSendEmail = asyncHandler(async (req, res, next) => {
     // const messages = emails.map(email => ({
     const messages = newEmails.map(email => ({
       to: email,
-      from: process.env.SENDGRID_TEMPLATE_ID_Second, // Replace with your verified sender email
+      from: process.env.SENDGRID_FROM_EMAIL, // Replace with your verified sender email
       subject: 'Welcome!',
       templateId: templateId,
       dynamic_template_data: dynamicData, // Ensure
@@ -442,6 +475,8 @@ module.exports = {
   loginUser,
   addUserContacts,
   getAllUsers,
+  getAllBulkEmails,
+  getDailyBulkEmails,
   grantAccess,
   denyAccess,
   getUserCallsByAdmin,
